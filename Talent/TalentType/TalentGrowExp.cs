@@ -7,7 +7,7 @@ public class TalentGrowExp : AbstractTalent
    public TalentGrowExp()
     {
         label = "GrowExp";
-        talentID = 1;
+        containID = 1;
 
        
     }

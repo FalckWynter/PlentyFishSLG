@@ -7,8 +7,9 @@ public class TalentExpToMana : AbstractTalent
     public TalentExpToMana()
     {
         label = "ExpToMana";
-        talentID = 2;
-
+        containID = 2;
+        imageID = 10002;
+        InitializeTalent();
     }
     public override void InitializeTransport()
     {

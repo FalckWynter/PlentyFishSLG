@@ -10,6 +10,7 @@ public interface IUpgradeAble
     int maxGrade { get; set; }
     //升级条件表
     Dictionary<ResourceType,float> upgradeCondition { get; set; }
+   
     //提升等级
     bool Upgrade();
     //是否满足升级条件

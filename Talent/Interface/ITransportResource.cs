@@ -25,6 +25,8 @@ public interface ITransportResource : IContainResource
     //尝试取出资源 返还能取出的最大数量
     KeyValuePair<ResourceType, float> TryRemoveResource(KeyValuePair<ResourceType, float> pair);
     KeyValuePair<ResourceType, float> TryRemoveResource(ResourceType type, float count);
+    //尝试添加传输节点
+    bool TryAddConnectNode(int id);
     //更新传输剩余时间
     void UpdateTransportTime();
     //进行资源传输

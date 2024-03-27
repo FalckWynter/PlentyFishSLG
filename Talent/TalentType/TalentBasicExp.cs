@@ -7,8 +7,9 @@ public class TalentBasicExp : AbstractTalent
     public TalentBasicExp()
     {
         label = "ExpSpawner";
-        talentID = 1;
-        
+        containID = 1;
+        imageID = 10001;
+        InitializeTalent();
     }
     public override void InitializeTransport()
     {
