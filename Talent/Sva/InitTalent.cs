@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class InitTalent : ITransportResource, IProduceResource<AbstractTalent>, IUpgradeAble, IModifyResource
+public class InitTalent : ITransportResource, IProduceResource<AbstractTalent>, IUpgradeAble, IModifyResource 
 {
     #region 天赋基本属性
     public string label;
@@ -47,6 +47,11 @@ public class InitTalent : ITransportResource, IProduceResource<AbstractTalent>, 
     public int maxGrade { get; set; }
 
     public Dictionary<ResourceType, float> upgradeCondition { get; set; }
+    public bool isAutoCollect { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+    public List<int> beConnectNodes { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+    public int maxConnecteNodes { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+    public int maxBeConnectNodes { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+    public List<ResourceType> resourceAutoCollect { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
 
     #endregion
 
@@ -594,6 +599,21 @@ public class InitTalent : ITransportResource, IProduceResource<AbstractTalent>, 
     }
 
     public bool TryAddConnectNode(int id)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public bool AutoCollectResource()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public void UpdateAutoCollect()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public bool TryAddBeConnectNode(int id)
     {
         throw new System.NotImplementedException();
     }

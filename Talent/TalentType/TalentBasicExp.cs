@@ -34,7 +34,7 @@ public class TalentBasicExp : AbstractTalent
         {
             {ResourceType.Exp , 10 }
         };
-
+        produceMaxTime = 1;
         base.InitializeProduce();
     }
     public override void InitializeUpgrade()
@@ -43,13 +43,15 @@ public class TalentBasicExp : AbstractTalent
         maxGrade = 5;
         upgradeCondition = new Dictionary<ResourceType, float>()
         {
-            {ResourceType.Exp , 100 }
+            {ResourceType.Exp , 1000 }
         };
         base.InitializeUpgrade();
     }
     public override KeyValuePair<ResourceType, float> ModifyOnProduceResource(KeyValuePair<ResourceType, float> pair)
     {
         float count = pair.Value;
+        if (count == 0)
+            return pair;
         //每级提供1点额外产出
         if (pair.Key == ResourceType.Exp)
             count += grade;

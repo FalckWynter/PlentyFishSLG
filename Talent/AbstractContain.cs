@@ -30,6 +30,11 @@ public class AbstractContain : ITransportResource, IModifyResource
 
     public float transportTime { get; set; }
     public float transportMaxTime { get; set; }
+    public bool isAutoCollect { get ; set ; }
+    public List<int> beConnectNodes { get; set; }
+    public int maxConnecteNodes { get; set; }
+    public int maxBeConnectNodes { get; set ; }
+    public List<ResourceType> resourceAutoCollect { get; set; }
 
 
     #endregion
@@ -53,10 +58,17 @@ public class AbstractContain : ITransportResource, IModifyResource
         resourceTransport = new Dictionary<ResourceType, float>();
         resourceLimit = new Dictionary<ResourceType, float>();
         resourcePermit = new Dictionary<ResourceType, float>();
+        resourceAutoCollect = new List<ResourceType>();
         connectNodes = new List<int>();
+        beConnectNodes = new List<int>();
+        maxConnecteNodes = -1;
+        maxBeConnectNodes = -1;
+
+        isAutoCollect = false;
 
         sprite = ImageData.Instance.GetImage(imageID);
         isDeleteNullContainResourceType = true;
+        isUsePremit = false;
 
         transportMaxTime = 10;
 
@@ -75,6 +87,7 @@ public class AbstractContain : ITransportResource, IModifyResource
     public virtual void Update()
     {
         UpdateTransportTime();
+        UpdateAutoCollect();
     }
     #endregion
 
@@ -217,7 +230,38 @@ public class AbstractContain : ITransportResource, IModifyResource
         resourceContain.Remove(type);
         return true;
     }
-
+    /// <summary>
+    /// 自动收集资源
+    /// </summary>
+    /// <returns></returns>
+    public bool AutoCollectResource()
+    {
+        if (resourceContain.Count == 0)
+            return false;
+        foreach(ResourceType type in resourceAutoCollect)
+        {
+            KeyValuePair<ResourceType, float> pair = TryRemoveResource(type);
+            if (pair.Value <= 0)
+                continue;
+            ContainManager.Instance.AddResource(pair);
+        }
+        //foreach(KeyValuePair<ResourceType,float> pair in resourceContain)
+        //{
+        //    if (pair.Value == 0)
+        //        continue;
+        //    ContainManager.Instance.AddResource(TryRemoveResource(pair));
+        //}
+        return true;
+    }
+    /// <summary>
+    /// 更新资源收集
+    /// </summary>
+    public void UpdateAutoCollect()
+    {
+        if (!isAutoCollect)
+            return;
+        AutoCollectResource();
+    }
     //添加资源时
     public virtual void TriggerOnAddResource()
     {
@@ -254,6 +298,7 @@ public class AbstractContain : ITransportResource, IModifyResource
     }
     public KeyValuePair<ResourceType, float> TryAddResource(ResourceType type, float count, AddResourceType addType = AddResourceType.None)
     {
+        Debug.Log("添加资源" + label + "种类" + type + "数量" + count);
         //最终能添加的数量
         float addCount = count;
         //如果限制列表存在该元素 黑名单中有
@@ -300,11 +345,19 @@ public class AbstractContain : ITransportResource, IModifyResource
     {
         return TryRemoveResource(pair.Key, pair.Value);
     }
+    public KeyValuePair<ResourceType, float> TryRemoveResource(ResourceType type)
+    {
+        if(!resourceContain.ContainsKey(type))
+            return new KeyValuePair<ResourceType, float>(type, 0); 
+        return TryRemoveResource(type,resourceContain[type]);
+    }
     public KeyValuePair<ResourceType, float> TryRemoveResource(ResourceType type, float count)
     {
         //KeyValuePair<ResourceType, int> pair = new KeyValuePair<ResourceType, int>(type, 0);
         //不包含该资源或者值为负数
-        if (!resourceContain.ContainsKey(type) || resourceContain[type] <= 0)
+        if (!resourceContain.ContainsKey(type))
+            return new KeyValuePair<ResourceType, float>(type, 0);
+        if (resourceContain[type] <= 0)
             return new KeyValuePair<ResourceType, float>(type, 0);
         //有但是数量不足 返回剩余的全部
         if (resourceContain[type] < count)
@@ -327,7 +380,11 @@ public class AbstractContain : ITransportResource, IModifyResource
         if (isUsePremit)
         {
             //如果不在白名单中 或容量超限
-            if (!resourcePermit.ContainsKey(pair.Key) && resourceContain[pair.Key] >= resourcePermit[pair.Key])
+            if (!resourcePermit.ContainsKey(pair.Key))
+                return true;
+            if (!resourceContain.ContainsKey(pair.Key))
+                resourceContain.Add(pair.Key, 0);
+            if (resourcePermit[pair.Key] >= 0 && resourceContain[pair.Key] >= resourcePermit[pair.Key])
                 //返回满
                 return true;
 
@@ -349,6 +406,7 @@ public class AbstractContain : ITransportResource, IModifyResource
         {
             TransportResource();
             transportTime = transportMaxTime;
+            Debug.Log("重设传输计时器" + transportTime);
         }
     }
     /// <summary>
@@ -372,9 +430,13 @@ public class AbstractContain : ITransportResource, IModifyResource
             //对每一条要传输的元素
             foreach (KeyValuePair<ResourceType, float> resource in resourceTransport)
             {
+                Debug.Log("要取出的元素" + resource.Key + "数量" + resource.Value + "从" + label);
                 //如果装不下该元素 跳过
                 if (ContainManager.Instance.ContainDictionary[node].isContainFull(resource))
+                {
+                    Debug.Log("目标" +node+"装不下了");
                     continue;
+                }
                 //取出元素
                 pair = TryRemoveResource(resource);
                 //如果取出空值 跳过
@@ -403,15 +465,66 @@ public class AbstractContain : ITransportResource, IModifyResource
         return ContainManager.Instance.ContainDictionary[targetID].TryAddResource(type, count, AddResourceType.Transport);
     }
     /// <summary>
-    /// 
+    /// 添加连接节点
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
     public bool TryAddConnectNode(int id)
     {
+        //如果要添加的节点数超过限制则忽略
+        if (maxConnecteNodes != -1 && connectNodes.Count >= maxConnecteNodes)
+            return false;
+        //如果已有该节点则忽略
         if (connectNodes.Contains(id))
             return false;
+        //如果不能与该节点产生链接 则否
+        if(ContainManager.Instance.ContainDictionary[id].CanBeConnect(id))
+        //添加该节点
         connectNodes.Add(id);
+        //将该节点添加到对方 * 不对 应该改为对管道作用 * 不影响
+        ContainManager.Instance.ContainDictionary[id].TryAddBeConnectNode(gameIndex);
+
+        return true;
+    }
+    /// <summary>
+    /// 检测是否能够发起链接
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    public bool CanConnect(int id)
+    {
+        //如果要添加的节点数超过限制则忽略
+        if (maxConnecteNodes != -1 && connectNodes.Count >= maxConnecteNodes)
+            return false;
+        //如果已有该节点则忽略
+        if (connectNodes.Contains(id))
+            return false;
+        return true;
+    }
+    public bool TryAddBeConnectNode(int id)
+    {
+        //直接复制应该没问题
+        //如果已经与该节点产生联系 则否
+        if (connectNodes.Contains(id) || beConnectNodes.Contains(id))
+            return false;
+        //最大被连接数量有上限 且超过上限 否
+        if (maxBeConnectNodes != -1 && beConnectNodes.Count >= maxBeConnectNodes)
+            return false;
+        return true;
+    }
+    /// <summary>
+    /// 检测是否能产生链接
+    /// </summary>
+    /// <param name="id">发起连接的节点</param>
+    /// <returns></returns>
+    public bool CanBeConnect(int id)
+    {
+        //如果已经与该节点产生联系 则否
+        if (connectNodes.Contains(id) || beConnectNodes.Contains(id))
+            return false;
+        //最大被连接数量有上限 且超过上限 否
+        if (maxBeConnectNodes != -1 && beConnectNodes.Count >= maxBeConnectNodes)
+            return false;
         return true;
     }
     public virtual void TriggerOnGetResourceFromTransport()
@@ -464,6 +577,8 @@ public class AbstractContain : ITransportResource, IModifyResource
         pair = ContainManager.Instance.ModifyOnProduceResource(pair);
         return pair;
     }
+
+
 
 
 

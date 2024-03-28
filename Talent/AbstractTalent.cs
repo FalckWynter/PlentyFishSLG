@@ -44,26 +44,18 @@ public class AbstractTalent : AbstractContain, IProduceResource<AbstractTalent>,
     }
     public override void InitializePre()
     {
-        resourceContain = new Dictionary<ResourceType, float>();
-        resourceTransport = new Dictionary<ResourceType, float>();
-        resourceLimit = new Dictionary<ResourceType, float>();
-        resourcePermit = new Dictionary<ResourceType, float>();
+        base.InitializePre();
         produceList = new Dictionary<ResourceType, float>();
         produceCost = new Dictionary<ResourceType, float>();
         upgradeCondition = new Dictionary<ResourceType, float>();
-        connectNodes = new List<int>();
-        Debug.Log("尝试初始化ID" + imageID);
-        sprite = ImageData.Instance.GetImage(imageID);
-        isDeleteNullContainResourceType = true;
-
-        transportMaxTime = 10;
+        //Debug.Log("尝试初始化ID" + imageID);
 
         produceMaxTime = 10;
         produceTryCount = 1;
 
         maxGrade = 1;
         grade = 1;
-        Debug.Log("启动构造函数");
+        //Debug.Log("启动构造函数");
     }
     public override void InitializeContain() {}
     /// <summary>
@@ -71,8 +63,7 @@ public class AbstractTalent : AbstractContain, IProduceResource<AbstractTalent>,
     /// </summary>
     public override void InitializeTransport()
     {
-
-        transportTime = transportMaxTime;
+        base.InitializeTransport();
     }
     /// <summary>
     /// 初始化 - 制造表 制造消耗 每次制造间隔 每次制造次数
@@ -95,6 +86,7 @@ public class AbstractTalent : AbstractContain, IProduceResource<AbstractTalent>,
         UpdateProduceTime();
         UpdateTransportTime();
         UpdateUpgradeCondition();
+        UpdateAutoCollect();
     }
     #endregion
 
@@ -113,9 +105,14 @@ public class AbstractTalent : AbstractContain, IProduceResource<AbstractTalent>,
                 //如果不满足消耗
                 if (!IsHaveEnoughResource(pair))
                 {
-                    Debug.LogWarning("资源不足" + this.GetType());
+                    Debug.LogWarning("资源不足" + this.GetType() + "来源" + this.label);
                     return false;
                 }
+            }
+            foreach (KeyValuePair<ResourceType, float> pair in produceCost)
+            {
+                Debug.Log("消耗资源" + pair);
+                TryRemoveResource(pair);
             }
             foreach (KeyValuePair<ResourceType, float> pair in produceList)
             {
@@ -135,7 +132,8 @@ public class AbstractTalent : AbstractContain, IProduceResource<AbstractTalent>,
 
     public virtual void TriggerOnProduceResource()
     {
-
+        Debug.Log("闪光启动");
+        GameActionManager.Instance.AddToBottom(new FlashIconAction(gameIndex));
     }
     /// <summary>
     /// 更新制造计数器
@@ -152,6 +150,7 @@ public class AbstractTalent : AbstractContain, IProduceResource<AbstractTalent>,
         {
             ProduceResource();
             produceTime = produceMaxTime;
+            Debug.Log("重设计数器" + produceTime);
         }
     }
 
@@ -167,6 +166,7 @@ public class AbstractTalent : AbstractContain, IProduceResource<AbstractTalent>,
         foreach(KeyValuePair<ResourceType,float> pair in upgradeCondition)
         {
             TryRemoveResource(pair);
+            Debug.Log("要移除的资源" + pair);
         }
         grade++;
 

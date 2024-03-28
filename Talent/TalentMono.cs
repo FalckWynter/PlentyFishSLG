@@ -9,21 +9,26 @@ public class ContainMono : MonoHasElement
     public int containID;
     public Light2D lanternLight;
     public SpriteRenderer talentImage;
-    public bool isFlashing,isFlashingDown;
-    public float flashTarget = 0.75f, flashStart = 3f;
-    public float flashSpeed = 0.5f;
+    public bool isFlashing,isFlashingDown = false;
+    public float flashTarget = 0.75f, flashStart = 2f;
+    public float flashSpeed = 1f;
     public LineRenderer parentLineRender;
     public bool isBuilding = false;
     public void Doflash()
     {
+       
         isFlashing = true;
         lanternLight.intensity = flashStart;
-        Invoke("Doflash", 2);
+
+        UpdateFlash();
+
     }
     public void UpdateFlash()
     {
-        if(isFlashing)
+
+        if (isFlashing)
         {
+
             lanternLight.intensity += Time.deltaTime * 3 * flashSpeed;
             if(lanternLight.intensity > flashStart)
             {
@@ -34,7 +39,8 @@ public class ContainMono : MonoHasElement
         }
         if(isFlashingDown)
         {
-            if(lanternLight.intensity > flashTarget)
+
+            if (lanternLight.intensity > flashTarget)
             {
                 lanternLight.intensity -= Time.deltaTime * flashSpeed ;
             }
@@ -74,7 +80,7 @@ public class ContainMono : MonoHasElement
     public override void Start()
     {
 
-        Invoke("Doflash", 2);
+
     }
     public void SetID(int id)
     {
@@ -83,6 +89,7 @@ public class ContainMono : MonoHasElement
     // Update is called once per frame
     public void Update()
     {
+ 
         UpdateFlash();
         UpdateBuilding();
     }
@@ -95,6 +102,9 @@ public class ContainMono : MonoHasElement
     }
     public void RefreshPipePoint()
     {
+        //这个功能交给建造器完成
+        return;
+        /*
         List<int> point = new List<int>();
         parentLineRender.positionCount = 0;
         int i = 0;
@@ -106,6 +116,7 @@ public class ContainMono : MonoHasElement
            parentLineRender.SetPosition(2* i + 1 ,ContainManager.Instance.ContainMonoData[node].transform.position);
             i += 1;
         }
+        */
     }
     public void TryEnterBuild()
     {

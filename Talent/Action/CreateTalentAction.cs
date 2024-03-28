@@ -23,11 +23,14 @@ public class CreateTalentAction : AbstractAction
         GameObject ob = GameObject.Instantiate(TalentData.Instance.prefab);
         ob.transform.position = spawnPosition;
         ob.transform.parent = spawnParent;
+        ob.name = talentToCreate.label;
         //生成对应数据类
         int index = ContainManager.Instance.GetContainIndex();
+        talentToCreate.gameIndex = index;
         ContainManager.Instance.ContainDictionary.Add(index, talentToCreate);
         ContainManager.Instance.ContainMonoData.Add(index,ob);
-        
+
+        //Debug.Log("产生了ID" + index + "对象" + ob.transform.position + "内容" + ContainManager.Instance.ContainMonoData[index]);
         //设置局内ID
         ob.GetComponent<ContainMono>().SetID(index);
         ob.GetComponent<ContainMono>().ReloadSprite();

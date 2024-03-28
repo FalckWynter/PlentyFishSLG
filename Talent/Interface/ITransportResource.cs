@@ -6,8 +6,14 @@ public interface ITransportResource : IContainResource
 {
     //是否使用白名单
     bool isUsePremit { get; set; }
+    //可以连接的最大节点数
+    int maxConnecteNodes { get; set; }
+    //可以被链接的最大节点数
+    int maxBeConnectNodes { get; set; }
     //连接到的节点ID
     List<int> connectNodes { get; set; }
+    //被连接的节点ID
+    List<int> beConnectNodes { get; set; }
     //继承该接口的类能够参与运输资源
     //资源黑白名单
     Dictionary<ResourceType, float> resourceLimit { get; set; }
@@ -27,6 +33,8 @@ public interface ITransportResource : IContainResource
     KeyValuePair<ResourceType, float> TryRemoveResource(ResourceType type, float count);
     //尝试添加传输节点
     bool TryAddConnectNode(int id);
+    //尝试记录被传输节点
+    bool TryAddBeConnectNode(int id);
     //更新传输剩余时间
     void UpdateTransportTime();
     //进行资源传输

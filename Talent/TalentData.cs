@@ -19,7 +19,8 @@ public class TalentData : Singleton<TalentData>
 
     //预制体路径
     public GameObject prefab;
-
+    public GameObject pipePrefab;
+    public string pipePrefabPath = "Prefabs/Contain/Pipe";
     public string prefabPath = "Prefabs/Contain/Talent";
 
     public GameObject talentParent;
@@ -28,6 +29,7 @@ public class TalentData : Singleton<TalentData>
         //载入ImagePath表，从公用参数中调用并输入路径
         Path = GameComponent.LoadExcelDataByPath(ExcelPath);
         prefab = Resources.Load<GameObject>(prefabPath);
+        pipePrefab = Resources.Load<GameObject>(pipePrefabPath);
         talentParent = GameObject.Find("TalentSpawner");
     }
     public string GetPath(int ID)

@@ -2,13 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TalentExpToMana : AbstractTalent
+public class TalentExpManaToAtk : AbstractTalent
 {
-    public TalentExpToMana()
+    public TalentExpManaToAtk()
     {
-        label = "ExpToMana";
-        containID = 2;
-        imageID = 10002;
+        label = "ExpManaToAtk";
+        containID = 3;
+        imageID = 10003;
         InitializeTalent();
     }
     public override void InitializeTransport()
@@ -16,34 +16,45 @@ public class TalentExpToMana : AbstractTalent
 
         resourceTransport = new Dictionary<ResourceType, float>()
         {
-            { ResourceType.Mana , 1 }
+            { ResourceType.Atk , 1 }
         };
 
         isUsePremit = true;
         resourcePermit = new Dictionary<ResourceType, float>()
         {
             { ResourceType.Exp , -1},
-            { ResourceType.Mana, -1}
+            { ResourceType.Mana, -1},
+            { ResourceType.Atk,-1 }
         };
 
-        transportMaxTime = 1;
+        transportMaxTime = 5;
         base.InitializeTransport();
     }
     public override void InitializeProduce()
     {
         produceList = new Dictionary<ResourceType, float>()
         {
-            {ResourceType.Mana , 1 }
+            {ResourceType.Atk , 1 }
         };
         produceCost = new Dictionary<ResourceType, float>()
         {
-            {ResourceType.Exp , 2 }
+            {ResourceType.Exp , 1 },
+            {ResourceType.Mana, 1 }
         };
-        produceTryCount = 2;
+        produceTryCount = 5;
 
         produceMaxTime = 1;
 
         base.InitializeProduce();
+    }
+    public override void InitializeContain()
+    {
+        isAutoCollect = true;
+        resourceAutoCollect = new List<ResourceType>()
+        {
+            ResourceType.Atk
+        };
+        base.InitializeContain();
     }
     public override void InitializeUpgrade()
     {
@@ -51,20 +62,16 @@ public class TalentExpToMana : AbstractTalent
         maxGrade = 5;
         upgradeCondition = new Dictionary<ResourceType, float>()
         {
-            {ResourceType.Mana , 200 },
-            {ResourceType.Exp , 500 }
+            {ResourceType.Atk , 500 }
         };
         base.InitializeUpgrade();
     }
     public override KeyValuePair<ResourceType, float> ModifyOnProduceResource(KeyValuePair<ResourceType, float> pair)
     {
         float count = pair.Value;
-        if (count == 0)
-            return pair;
-     
-        //每级提供0.2点额外产出
+        //每级提供0.1点额外产出
         if (pair.Key == ResourceType.Mana)
-            count += grade * 0.2f;
+            count += grade * 0.1f;
         pair = new KeyValuePair<ResourceType, float>(pair.Key, count);
 
         return base.ModifyOnProduceResource(pair);

@@ -9,6 +9,10 @@ public interface IContainResource
     Dictionary<ResourceType, float> resourceContain { get; set; }
     //是否移除空的资源类型
     bool isDeleteNullContainResourceType { get; set; }
+    //是否自动收集
+    bool isAutoCollect { get; set; }
+    //自动收集名单
+    List<ResourceType> resourceAutoCollect { get; set; }
 
     //输入资源
     bool AddResource(ResourceType type, float count, AddResourceType addType = AddResourceType.None);
@@ -25,6 +29,11 @@ public interface IContainResource
     KeyValuePair<ResourceType, float> GetResourceCopy(ResourceType type, float count);
     //删除资源
     bool DeleteResource(ResourceType type);
+    //收集资源
+    bool AutoCollectResource();
+
+    //更新自动收集
+    void UpdateAutoCollect();
 
     //触发器 - 输入资源时触发
     void TriggerOnAddResource();
@@ -41,7 +50,7 @@ public interface IContainResource
 //资源种类 
 public enum ResourceType
 {
-    Exp, Mana
+    Exp, Mana,Atk
 }
 //增加资源方式
 public enum AddResourceType

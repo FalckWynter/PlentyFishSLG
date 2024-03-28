@@ -14,16 +14,22 @@ public class BuildStateConnect : BuildStateSample
     {
         if (SelectedContain.Count == 1)
         {
-            Debug.Log("ID" + SelectedContain[0]);
-            Debug.Log("对象" + ContainManager.Instance.ContainMonoData[SelectedContain[0]]);
+            //Debug.Log("ID" + SelectedContain[0]);
+            //Debug.Log("对象" + ContainManager.Instance.ContainMonoData[SelectedContain[0]]);
             BuildManager.Instance.buildLiner.SetPosition(0, ContainManager.Instance.ContainMonoData[SelectedContain[0]].transform.position);
             BuildManager.Instance.buildLiner.SetPosition(1, new Vector3(Camera.main.ScreenToWorldPoint(Input.mousePosition).x, Camera.main.ScreenToWorldPoint(Input.mousePosition).y, -1));
         }
         if (SelectedContain.Count == 2)
         {
-            //创造链接
-            ContainManager.Instance.ContainDictionary[SelectedContain[0]].TryAddConnectNode(SelectedContain[1]);
-            ContainManager.Instance.ContainMonoData[SelectedContain[0]].GetComponent<ContainMono>().RefreshPipePoint();
+            //创造链接 结果自律
+            if(ContainManager.Instance.ContainDictionary[SelectedContain[0]].TryAddConnectNode(SelectedContain[1]))
+            {
+                //如果链接成功 创建线路
+                ContainManager.Instance.ContainMonoData[SelectedContain[0]].GetComponent<ContainMono>().RefreshPipePoint();
+                //生成预制体
+                GameActionManager.Instance.AddToBottom(new CreatePipeAction(SelectedContain[0], SelectedContain[1]));
+            }
+
             Debug.LogWarning("完成节点链接" + SelectedContain[1]);
             //退出建造模式
             BuildManager.Instance.ExchangeState(BuildManager.BuildType.None);
